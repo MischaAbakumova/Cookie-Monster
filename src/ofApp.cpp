@@ -13,13 +13,26 @@ void ofApp::setup(){
     
     camera.initGrabber(320, 240); //init the camera
     tracker.setup();
+    start();
+  
     
-    myFont.loadFont("myFont.ttf", 16);
+    myFont.loadFont("myFont.ttf", 20);
     
+};
+
+void ofApp::start(){
+
+    ofBackground(255, 255, 255);
     radius = 30;
-    fat = 40;
     score = 0;
+    playTimer = 0;
+    fat = 120;
+    gameStage = 0;
+   
     
+    username = "Enter Your Name";
+    enterName = false;
+
     
     
     //----------LOADIING IMAGES--------------------------------------
@@ -40,7 +53,7 @@ void ofApp::setup(){
     
    
     
-    for (int i = 0; i < 20; i++){
+    for (int i = 0; i < 15; i++){
         cookie p;
         p.position.set(ofRandomWidth(), ofRandomHeight());
         cookieList.push_back(p); //adds a new element to the end of the array.
@@ -51,7 +64,7 @@ void ofApp::setup(){
         chickenWingList.push_back(wng); //adds a new element to the end of the array.
     }
     
-    for (int i = 0; i < 20; i++){
+    for (int i = 0; i < 15; i++){
         healthyVeggie veg;
         int randomImage = round(ofRandom(goodImages.size()-1));
         ofImage myGoodImg = goodImages [randomImage];
@@ -72,7 +85,7 @@ void ofApp::setup(){
     }
     
 
-}
+};
 
 //----------------UPDATE-----------------------------------------------
 void ofApp::update(){
@@ -80,7 +93,6 @@ void ofApp::update(){
     faceTrackerUpdate();
     
   
-    
 //---------------MOUTH OPENING-----------------------------------------
 
     mouthWidth = tracker.getGesture(ofxFaceTracker::MOUTH_WIDTH)* 15;
@@ -93,10 +105,11 @@ void ofApp::update(){
     
     
     facePosition = tracker.getPosition();
+//    cout<<facePosition<<"\n";
     mappedPosition.x = ofMap(facePosition.x, 0, 320, 0, ofGetWindowWidth());
     mappedPosition.y = ofMap(facePosition.y, 0, 240, 0, ofGetWindowHeight());
     mappedPosition.x = ofGetWindowWidth()-mappedPosition.x; //mirrows the position on the x-axis
-   
+  
     
     monsterPos.x = mappedPosition.x;
     monsterPos.y = mappedPosition.y;
@@ -104,8 +117,7 @@ void ofApp::update(){
     eyePos.set(monsterPos.x, monsterPos.y-75);
     leftEye.pos = ofPoint( eyePos.x - 35, eyePos.y );
     rightEye.pos = ofPoint( eyePos.x + 35, eyePos.y );
-
-        
+    
 
     
     
@@ -125,20 +137,44 @@ void ofApp::update(){
         killerVeggieList[i].update();
     }
     
+    
+    //-----------Focusing on a Cookie----------------------------------------
+    float onCookie = ofDist(cookieList[0].position.x, cookieList[0].position.y, eyePos.x, eyePos.y);
+    ofPoint focus = cookieList[0].position;
+    //  leftEye.mousePos = focus;
+    //    rightEye.mousePos = focus;
 
-}
+
+};
 
 //--------------------------------------------------------------
 void ofApp::draw(){
-    //ofSetColor(255, 255, 255);
     
-    ofSetColor(0, 0,0);
+    if(gameStage == 0){
+        ofBackground(255, 255, 255);
+        ofPushStyle();{
+        ofSetColor(0);
+        myFont.drawString("YOU HAVE ONE MINUTE TO EAT AS MUCH AS YOU CAN!", ofGetWindowWidth()/2, 300);
+        myFont.drawString("PRESS 'RETURN' WHEN YOU ARE READY", ofGetWindowWidth()/2, ofGetWindowHeight()/2 + 300);
+        }ofPopStyle();
+    }
+    
+    else if (gameStage ==1);{
+    
+    
+    ofBackground(255,255,255);
+    
+    ofSetColor(0,0,0);
+    playTimer = (60-ofGetElapsedTimef());
+    //------------------------------DISPLAY NUMBERS------------------------------
     myFont.drawString("COOKIE MONSTER: " + ofToString(score),50, 50); //experiment
+    myFont.drawString("TIME: "+ ofToString(playTimer), 1270, 50);
     
   //------------------------MY MONSTER------------------------------
     cookieMonster(monsterPos.x, monsterPos.y);
-    leftEye.draw();
-    rightEye.draw();
+    leftEye.draw(mouseX, mouseY);
+    rightEye.draw(mouseX, mouseY);
+   
     
     //comment this out if you don't need the tracker data
     //faceTrackerDraw();
@@ -150,9 +186,9 @@ void ofApp::draw(){
     ofEllipse(monsterPos.x, monsterPos.y+30, mouthWidth*0.7, mouthHeight*0.7);
     ofSetColor(255, 255, 255);
     }ofPopMatrix();
-    
-    
-    
+        
+   
+
     //drawing COOKIES
     for (int i = 0; i<cookieList.size(); i++) {
        //--------------------------eat a cookie--------------------------------------------------
@@ -168,7 +204,8 @@ void ofApp::draw(){
         } else {
             if ( distance < radius && mouthHeight < mouthClosedThresh ){
                 cookieList.erase(cookieList.begin()+i);
-                 score += 10;
+                score += 10;
+                fat += 2.8;
             } else if (distance > radius * 2.) {
                 cookieList[i].bEating = false;
             }
@@ -177,10 +214,8 @@ void ofApp::draw(){
        
 //        ofDrawBitmapString(ofToString(distance), cookieList[i].position);
     }
-    
-    
-    
-    //drawing CHIKEN WINGS
+        
+            //drawing CHIKEN WINGS
     
     for (int i = 0; i<chickenWingList.size(); i++) {
         //---------------------------eat a chicken---------------------------------------------
@@ -196,7 +231,8 @@ void ofApp::draw(){
         } else {
             if(distanceWings < radius && mouthHeight < mouthClosedThresh){
               chickenWingList.erase(chickenWingList.begin()+i);
-                score += 5;
+                score += 15;
+                fat += 4.5;
             }else if (distanceWings > radius*2.){
                 chickenWingList[i].bChickenEating = false;
             }
@@ -227,6 +263,7 @@ void ofApp::draw(){
         if (distanceGoodVeggie < radius && mouthHeight < mouthClosedThresh){
             healthyVeggieList.erase(healthyVeggieList.begin()+i);
             score += 5;
+            fat -= 3;
         } else if (distanceGoodVeggie > radius * 2.) {
             healthyVeggieList[i].bVeggieEating = false;
         }
@@ -238,7 +275,7 @@ void ofApp::draw(){
     
     for (int i = 0; i<killerVeggieList.size(); i++) {
         
-        //----------------eating a killer veggie -------------------------
+        //----------------eating a killer veggie ---------------------------------------------------------------
         float distanceKillerVeggie = ofDist(monsterPos.x, monsterPos.y, killerVeggieList[i].enemyPosition.x, killerVeggieList[i].enemyPosition.y);
         
         //not being eaten
@@ -251,14 +288,26 @@ void ofApp::draw(){
         }else{
         if (distanceKillerVeggie < radius && mouthHeight < mouthClosedThresh){
             killerVeggieList.erase(killerVeggieList.begin()+i);
+            
+            
         }else if (distanceKillerVeggie > radius * 2.){
             killerVeggieList[i].bKillEating = false;
+            
         }
-        }
+
+    }
         killerVeggieList[i].draw();
     }
+    
+    if(playTimer <= 0){
+        clearAll();
+    }
+    }
+    
+        
+        //----------------------Done with Veggies----------------------------------------------------
 
-}
+};
 
 
 void ofApp::faceTrackerUpdate(){
@@ -271,8 +320,9 @@ void ofApp::faceTrackerUpdate(){
         rotationMatrix = tracker.getRotationMatrix();
     }
     
-}
+};
 
+//-------------FACE TRACK-----------------------------------------------------
 void ofApp::faceTrackerDraw(){
     ofSetColor(255);
         camera.draw(0, 0, 640, 480);
@@ -282,7 +332,7 @@ void ofApp::faceTrackerDraw(){
         tracker.draw();
     
     }
-}
+};
 //-------------Monster Creation---------------------------------------------
 void ofApp::cookieMonster(float x, float y){
     ofPushMatrix();{
@@ -290,9 +340,44 @@ void ofApp::cookieMonster(float x, float y){
         ofFill();
         ofSetColor(70, 118, 184);
         ofSetCircleResolution(100); //enables to draw fine circles
-        ofCircle(0, 0, 120);
+        ofCircle(0, 0, fat); // will he get fat?
         ofSetColor(255, 255, 255);
     } ofPopMatrix();
 };
 
+//----------------congratulation, you won--------------------------------
+void ofApp::clearAll(){
+    if (playTimer <= 0){
+        healthyVeggieList.clear();
+        killerVeggieList.clear();
+        cookieList.clear();
+        chickenWingList.clear();
+        ofPushStyle();{
+        ofBackground(0,0,0);
+        myFont.drawString("CONGRADULATIONS!", ofGetWindowWidth()/2-100, ofGetWindowHeight()/2);
+        myFont.drawString("YOUR SCORE IS "+ ofToString(score), ofGetWindowWidth()/2-100, ofGetWindowHeight()/2+50);
+        myFont.drawString("Press 'RETURN' to try again", ofGetWindowWidth()/2-100, ofGetWindowHeight()/2+100);
+        }ofPopStyle();
+    }
+
+};
+//-----------------------------------------------------------------------------------
+void ofApp::keyPressed(int key){
+    cout << key << endl;
+    
+    if (key == OF_KEY_RETURN){
+        gameStage ++;
+        ofResetElapsedTimeCounter();
+        start();
+    }
+    
+//        if(enterName){
+//            if(key == OF_KEY_DEL || key == OF_KEY_BACKSPACE){
+//                username = username.substr(0, username.length()-1);
+//    
+//            }
+//                username.append(1, (char)key);
+//            }
+
+};
 

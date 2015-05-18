@@ -15,17 +15,17 @@ using namespace cv;
 class Eyes {
 public:
     
-    ofVec3f pos, mousePos;
+    ofVec3f pos;
     float angle;
     
-    void draw() {
+    void draw(float mouseX, float mouseY) {
         ofPushMatrix();{
             ofTranslate( pos );
             ofScale(0.6f,0.6f);
-            float x = mousePos.x - pos.x;
-            float y = mousePos.y - pos.y;
+            float x = mouseX - pos.x;
+            float y = mouseY - pos.y;
             
-            angle = atan2( y , x );
+            angle = atan2( y , x ) ;
             ofRotate( ofRadToDeg(angle) );
             
            //---------eyeballs----------------------
@@ -34,7 +34,7 @@ public:
             
             //--------irisis-------------------------
             ofSetColor( 0 );
-            ofCircle(0, 0, 20);
+            ofCircle(20, 0, 20);
         }ofPopMatrix();
     }
     
@@ -46,9 +46,12 @@ class ofApp : public ofBaseApp{
 		void setup();
 		void update();
 		void draw();
+        void start();
         void cookieMonster(float x, float y);
         void faceTrackerUpdate();
         void faceTrackerDraw();
+        void clearAll();
+        void keyPressed(int key);
     
     void exit(){
         tracker.waitForThread();
@@ -74,6 +77,7 @@ class ofApp : public ofBaseApp{
     vector<chickenWing> chickenWingList; // creates an array of wings
     vector<healthyVeggie>healthyVeggieList; //creates an array of veggies
     vector<killerVeggie>killerVeggieList; //creates an array of poison veggie
+    vector<string> saveName;
     
     vector<ofImage> killerImages;
     vector<ofImage> goodImages;
@@ -84,8 +88,12 @@ class ofApp : public ofBaseApp{
     float radius;
     float fat;
     int score;
-    
+    int playTimer;
+    int gameStage;
+    string username;
+    bool enterName;
     ofTrueTypeFont myFont;
+    
     
     
 };
