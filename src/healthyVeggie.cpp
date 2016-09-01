@@ -9,7 +9,7 @@
 #include "healthyVeggie.h"
 
 healthyVeggie::healthyVeggie(){
-    goodVeggie.loadImage("eggplant.png");
+    goodVeggie.load("eggplant.png");
     veggieVelocity.set(ofRandom(-0.2, 0.5),ofRandom(-0.2, 0.5));
     
 }

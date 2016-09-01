@@ -9,7 +9,7 @@
 
 #include "cookie.h"
 cookie::cookie(){
-    cookies.loadImage("cookies-cartoon.png");
+    cookies.load("cookies-cartoon.png");
     velocity.set(ofRandom(-2,1),ofRandom(-2,1));
     
     bEating = false;

@@ -8,6 +8,7 @@
 #include "chicken.h"
 #include "healthyVeggie.h"
 #include "killerVegie.h"
+#include "ofxGui.h"
 
 using namespace ofxCv;
 using namespace cv;
@@ -19,22 +20,22 @@ public:
     float angle;
     
     void draw(float mouseX, float mouseY) {
-        ofPushMatrix();{
+            ofPushMatrix();{
             ofTranslate( pos );
             ofScale(0.6f,0.6f);
             float x = mouseX - pos.x;
             float y = mouseY - pos.y;
             
             angle = atan2( y , x ) ;
-            ofRotate( ofRadToDeg(angle) );
+            ofRotate(ofRadToDeg(angle));
             
            //---------eyeballs----------------------
             ofSetColor( 255 );
-            ofCircle(0, 0, 70);
+            ofDrawCircle(0, 0, 70);
             
             //--------irisis-------------------------
             ofSetColor( 0 );
-            ofCircle(20, 0, 20);
+            ofDrawCircle(20, 0, 20);
         }ofPopMatrix();
     }
     
@@ -47,40 +48,50 @@ class ofApp : public ofBaseApp{
 		void update();
 		void draw();
         void start();
+        void restart();
+        void game();
         void cookieMonster(float x, float y);
         void faceTrackerUpdate();
         void faceTrackerDraw();
         void clearAll();
         void keyPressed(int key);
+        void gameOver();
+        void intro();
+        void deathScreen();
+        void drawFood();
     
-    void exit(){
+        void exit(){
         tracker.waitForThread();
     }
   
-    //------CAMERA STEUP-------------------------------------------
+    //----------------------------CAMERA STEUP----------------------------------------------------------------------------------------
+    // taken from Kyle Mcdonald Face TRack example https://github.com/kylemcdonald/ofxFaceTracker
     
     ofVideoGrabber camera;
-    ofxFaceTrackerThreaded tracker;      // taken from
-    ofVec2f position;           // Kyle Mcdonald Face TRack example
-    float scale;                //  https://github.com/kylemcdonald/ofxFaceTracker
-    ofVec3f orientation;        //
-    ofMatrix4x4 rotationMatrix; //
+    ofxFaceTrackerThreaded tracker;
+    ofVec2f position;
+    float scale;
+    ofVec3f orientation;
+    ofMatrix4x4 rotationMatrix;
     
 
-    //------MONSTER MOVING---------------------------------------------------
-    
+    //---------------------------MONSTER MOVING-------------------------------------------------------------------------------------
+    ofVec2f mappedPosition;
+    ofVec2f facePosition;
     ofVec2f monsterPos;
     float mouthWidth;
     float mouthHeight;
     
+    //----------------------------LOADS THE IMAGES-----------------------------------------------------------------------------------
     vector<cookie> cookieList; //creates an empty array of cookies
     vector<chickenWing> chickenWingList; // creates an array of wings
     vector<healthyVeggie>healthyVeggieList; //creates an array of veggies
-    vector<killerVeggie>killerVeggieList; //creates an array of poison veggie
-    vector<string> saveName;
-    
+    vector<killerVeggie>killerVeggieList; //creates an array of veggies that will kill the monster
     vector<ofImage> killerImages;
     vector<ofImage> goodImages;
+    ofImage myImg;
+    ofImage goodVeg;
+
     
     Eyes rightEye, leftEye;
     ofVec2f eyePos;
@@ -88,12 +99,18 @@ class ofApp : public ofBaseApp{
     float radius;
     float fat;
     int score;
+    
+    //------------------------------------UI elements-----------------------------------------------------------
     int playTimer;
     int gameStage;
-    string username;
-    bool enterName;
     ofTrueTypeFont myFont;
+    int energyLevel;
+    int energyTimer;
     
+    
+    int INTRO_GAME_STATE = 0;
+    int GAME_STATE = 1;
+    int DEATH_SCREEN_STATE = 2;
     
     
 };

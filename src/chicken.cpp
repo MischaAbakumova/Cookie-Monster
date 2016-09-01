@@ -9,7 +9,7 @@
 #include "chicken.h"
 
 chickenWing::chickenWing(){
-    wing.loadImage("chicken-wing.png");
+    wing.load("chicken-wing.png");
     wingVelocity.set(ofRandom(-0.2, 0.5),ofRandom(-0.2, 0.5));
     
 }

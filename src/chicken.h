@@ -19,11 +19,15 @@ public:
     void update();
     void draw();
     
+
     chickenWing();
+    
     
     ofImage wing;
     ofVec2f wingPosition;
     ofVec2f wingVelocity;
+    
+    
 //------eating?-----------------
     bool bChickenEating;
     

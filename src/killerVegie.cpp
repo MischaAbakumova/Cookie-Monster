@@ -10,7 +10,7 @@
 
 killerVeggie::killerVeggie(){
     
-    //enemyVeggie.loadImage("apple.png");
+    //enemyVeggie.load("apple.png");
     enemyVelocity.set(ofRandom(-0.5, .5), ofRandom(-0.5, .5));
     
 }
